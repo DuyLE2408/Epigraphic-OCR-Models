@@ -1,8 +1,11 @@
 # Epigraphic-OCR-Models
-# Epigraphic-OCR-Models
+
 PROJECT: BUILDING A TRAINING DATASET FOR INSCRIPTION OCR MODELS
+
     Institution: VNUHCM-University of Science
+    
     Team Members: Lê Trần Khánh Duy - Huỳnh Đức Dương - Lê Quí Thịnh
+    
     Instructors: Mr. Đinh Điền, Mr. Nguyễn Hồng Bửu Long and Mr. Lương An Vinh
 
 1. Project Overview
