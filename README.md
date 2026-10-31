@@ -8,7 +8,7 @@ PROJECT: BUILDING A TRAINING DATASET FOR INSCRIPTION OCR MODELS
     
     Instructors: Mr. Đinh Điền, Mr. Nguyễn Hồng Bửu Long and Mr. Lương An Vinh
 
-1. Project Overview
+## 1. Project Overview
 This project focuses on collecting, preprocessing, and building a standardized dataset to train two AI models:
 
  a. Inscription OCR Model: Detection and recognition of Sino-Nom characters on ancient stone stele rubbings.
@@ -17,7 +17,7 @@ This project focuses on collecting, preprocessing, and building a standardized d
 
 Image data is retrieved from the open-access portal Vietnamica (gallery.vietnamica.online) and expert-annotated research materials provided by the CLC Lab.
 
-2. Project Structure
+## 2. Project Structure
 The project is structured following standard open-source conventions for readability and maintainability:
 
 Epigraphic-OCR-Models/
@@ -45,7 +45,7 @@ Epigraphic-OCR-Models/
 
 ## Coding & Naming Conventions
 
-## Member 1: File src/text_processing.py
+# Member 1: File src/text_processing.py
 
 def extract_text_from_pdf(pdf_path: str) -> str:
     """OCR file PDF tài liệu thô thành chuỗi văn bản."""
@@ -67,7 +67,7 @@ def split_text_types(cleaned_text: str) -> dict:
     """
     pass
 
-## Member 2: File src/image_ocr.py
+# Member 2: File src/image_ocr.py
 
 import numpy as np
 
@@ -99,7 +99,9 @@ def sort_tran_bia_boxes(boxes: list) -> list:
     """Đảo thứ tự đọc chữ ở trán bia từ Phải sang Trái."""
     pass
 
-## Member 3: File src/alignment.py and src/exporter.py
+# Member 3: File src/alignment.py and src/exporter.py
+
+- src/alignment.py:
 
 def align_ocr_with_ground_truth(ocr_boxes: list[dict], han_text_list: list[str]) -> list[dict]:
     """Gióng hàng chữ OCR từ ảnh với bản chữ Hán chuẩn (Dataset 1)."""
@@ -108,9 +110,8 @@ def align_ocr_with_ground_truth(ocr_boxes: list[dict], han_text_list: list[str])
 def align_translation_sentences(han_list: list[str], phien_am_list: list[str], dich_list: list[str]) -> list[dict]:
     """Gióng hàng theo cặp câu 3 thành phần (Dataset 2)."""
     pass
-
-
-# src/exporter.py
+    
+- src/exporter.py: 
 
 def export_det_gt(aligned_data: list, output_file: str = "det_gt.txt") -> None:
     """Xuất file det_gt.txt theo đúng định dạng JSON points."""
@@ -124,7 +125,7 @@ def export_results_excel(aligned_data: list, output_file: str = "results.xlsx") 
     """Xuất file results.xlsx chứa các cột Image ID, Patch ID, Bounding Box, SinoNom OCR."""
     pass
 
-3. Pipeline & Workflow
+## 3. Pipeline & Workflow
 The data preparation pipeline consists of 4 main stages:
 
 graph TD
@@ -147,7 +148,7 @@ c. Stage 3 (Data Alignment): Apply alignment algorithms (BertAlign/Levenshtein) 
 
 d. Stage 4 (Dataset Export & Reporting): Generate target annotations (det_gt.txt, rec_gt.txt, results.xlsx) and compile summary statistics.
 
-4. Installation & Usage
+## 4. Installation & Usage
 Prerequisites
 - Python >= 3.8
 - OpenCV, Pandas, PaddleOCR, BertAlign / Levenshtein
@@ -172,7 +173,7 @@ d. Execution:
 - Run an individual component (e.g., Image Processing):
     python src/image_ocr.py
 
-5. Final Deliverables
+## 5. Final Deliverables
 The final submission folder sent to the Lab/Instructors includes:
 
  a. 3 Text Folders: Cleaned Sino-Nom, Transliteration, and Translation text files for each stele.
@@ -185,7 +186,7 @@ The final submission folder sent to the Lab/Instructors includes:
 
  e. Summary Report: Quantitative metrics on the total number of bounding boxes and aligned sentence pairs.
 
-6. Team Roles & Contribution Breakdown
+## 6. Team Roles & Contribution Breakdown
 
 - Member 1: Lê Trần Khánh Duy - Text Pipeline (29%): Responsible for raw PDF OCR via Google Vision, text filtering, and organizing the 3 text ground-truth datasets.
 
