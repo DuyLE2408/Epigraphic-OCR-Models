@@ -1,1 +1,0 @@
-# Epigraphic-OCR-Models
