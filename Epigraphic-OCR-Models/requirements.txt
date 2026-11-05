@@ -1,0 +1,18 @@
+# === Xử lý hình ảnh & OCR ===
+paddlepaddle>=2.5.0
+paddleocr>=2.6.0
+opencv-python>=4.8.0
+Pillow>=10.0.0
+
+# === NLP & Thuật toán gióng hàng ===
+bertalign>=0.1.0
+Levenshtein>=0.21.0
+torch>=2.0.0
+transformers>=4.30.0
+
+# === Quản lý dữ liệu & Xuất file Excel ===
+pandas>=2.0.0
+openpyxl>=3.1.0
+
+# === API bổ trợ (Tùy chọn) ===
+google-cloud-vision>=3.4.0
