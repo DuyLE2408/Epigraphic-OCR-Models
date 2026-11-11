@@ -1,0 +1,24 @@
+# Local image-processing environment and Python caches.
+.venv-image/
+.venv-ocr/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local credentials; example templates may be committed.
+.env
+.env.*
+!.env.example
+
+# Local Lab inputs and generated images; existing tracked files stay tracked.
+/data/raw/**
+!/data/raw/**/
+!/data/raw/**/.gitkeep
+/data/dataset/*/images/*
+!/data/dataset/*/images/.gitkeep
+/data/dataset/*/patches/*
+!/data/dataset/*/patches/.gitkeep
+/data/dataset/*/det_gt.txt
+/data/dataset/*/rec_gt.txt
+/data/dataset/*/results.xlsx
+/data/image_pipeline/

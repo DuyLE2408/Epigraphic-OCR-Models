@@ -1,0 +1,33 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Raw → OCR trường → xử lý box (1 hoặc All)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/run_image_pipeline.py",
+            "python": "${workspaceFolder}/.venv-image/Scripts/python.exe",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "args": [],
+            "env": {
+                "PYTHONIOENCODING": "utf-8",
+                "PYTHONDONTWRITEBYTECODE": "1"
+            }
+        },
+        {
+            "name": "Lọc / tự sửa / sắp box đã OCR (không API)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/run_image_pipeline.py",
+            "python": "${workspaceFolder}/.venv-image/Scripts/python.exe",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "args": ["--postprocess-only"],
+            "env": {
+                "PYTHONIOENCODING": "utf-8",
+                "PYTHONDONTWRITEBYTECODE": "1"
+            }
+        }
+    ]
+}

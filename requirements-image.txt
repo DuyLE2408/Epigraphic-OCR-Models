@@ -1,0 +1,5 @@
+# PDF/JPEG normalization, school OCR API and local bounding-box previews.
+# The school API client uses Python's standard library (urllib).
+# PyMuPDF 1.x avoids the extra layout/AI dependencies of 2.x.
+PyMuPDF==1.26.7
+Pillow==13.0.0

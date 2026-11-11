@@ -1,5 +1,65 @@
 # Epigraphic-OCR-Models
 
+Repository layout: `src/`, `data/`, the requirements files, and scripts now sit
+directly beside this README at the Git root. The former nested
+`Epigraphic-OCR-Models/` application directory has been removed. All project
+paths are relative to this single root unless stated otherwise.
+
+For Member 2, select `.venv-image/Scripts/python.exe` and open
+`run_image_pipeline.py`. Run/F5 now processes one raw PDF/JPEG or All:
+native-resolution RGB/JPG preparation → Kim Han Nom school API → raw OCR JSON → local box filtering,
+repair and reading order in 03_filter_sort. A masked dialog requests the website cookie token when needed;
+credentials are never saved. Python's standard HTTP library is used, so no new
+packages or local PaddleOCR models are required.
+
+The default Run adds a full-image horizontal pass (ocr_id=4,
+reading_direction=2, epitaph=0) to try to detect missing headers. Vertical OCR stays unchanged;
+horizontal results live in `02_ocr/<image_id>/header/general/`, and
+`ocr_combined.json` combines selected headers with body boxes on one image.
+Stage 03 sorts header boxes right-to-left and marks automatic selections for review.
+Selection uses a geometric search band above a dense body-column group; it can
+miss or misclassify titles and needs a real-image trial. No cropped image is sent.
+Existing vertical results are reused; no need to delete old outputs or progress.
+A fresh two-pass image uses at least four API requests; adding the horizontal pass
+to an existing vertical result uses two. Quota checkpoints apply to both passes.
+The earlier horizontal epitaph=1 trial returned zero raw boxes on stele 99.
+That attempt is preserved under `header/`; the new general-text trial is separate.
+Whether this setting improves real detection has not been established.
+
+OCR inputs are no longer resized to 1024 px. Compatible RGB JPEGs are copied
+without recompression; PDFs use embedded extraction or a 300 DPI page render.
+Boxes use pixels of the prepared image throughout stages 02–03. The 1024 px
+dataset image limit applies at final export, with coordinates transformed then;
+vertical patches will be cropped before rotation and height reduction to 96 px.
+Crop and dataset export are still pending. Old resized processing results must
+not be reused as native-resolution OCR results.
+
+A shared work queue at `data/image_pipeline/school_api/progress.json` records
+completed (through stage 03) and pending images. Existing OCR-only results are
+resumed locally before processing new API work; no image is resent for stage 03.
+All processes only pending entries; completed
+images do not enter the processing loop. Use `--recheck-completed` for a full
+integrity check after manually editing outputs. Quota exhaustion stops the run with a saved
+report; the next Run continues pending stages. Reports are retained under
+`data/image_pipeline/run_reports/<run_id>/`. Use `--normalize-only` for the
+previous local-only normalization mode. Images use `<stele_id>.<image_index>.jpg`;
+supplied pages remain optional metadata and full books are not searched.
+Run/F5 also offers a separate local filter/repair/order mode for existing OCR results.
+It removes invalid/outside/identical duplicate boxes, orders confirmed headers
+right-to-left and body columns left-to-right/top-to-bottom. Unconfirmed regions
+remain provisional. Pixel/geometry heuristics can merge aligned fragments and
+extend short truncated columns. Uncertain extensions remain proposals; changed
+boxes retain source provenance and flag OCR refresh. No extra API calls or packages
+are needed. Real-image accuracy still needs validation; patches and alignment are pending.
+Follow [the Image Pipeline guide](docs/image_pipeline.md) for outputs, quota
+handling and the first real-image test.
+
+Processing stages live directly under
+`data/image_pipeline/<book_id>/<stele_id>/01_prepare`, `02_ocr/<image_id>` and
+`03_filter_sort/<image_id>`.
+No Member 3 handoff is generated yet; `data/dataset` will be handled later.
+Existing dataset files remain unchanged.
+
 PROJECT: BUILDING A TRAINING DATASET FOR INSCRIPTION OCR MODELS
 
     Institution: VNUHCM-University of Science
@@ -21,27 +81,60 @@ Image data is retrieved from the open-access portal Vietnamica (gallery.vietnami
 The project is structured following standard open-source conventions for readability and maintainability:
 
 Epigraphic-OCR-Models/
-├── data/                       # Project datasets (Ignored in Git except for samples)
-│   ├── raw/                    # Raw PDFs & original images downloaded from Vietnamica
-│   ├── processed_text/         # 3 separate text folders (Sino-Nom, Transliteration, Translation)
-│   └── dataset/                # Final output deliverables
-│       ├── images/             # Page images (Max edge <= 1024px)
-│       ├── patches/            # Cropped line images (Height <= 96px, rotated 90° CCW)
-│       ├── det_gt.txt          # Detection ground truth (Bounding box coordinates)
-│       ├── rec_gt.txt          # Recognition ground truth (Patch path - Sino-Nom text)
-│       └── results.xlsx        # Consolidated output metadata
+├── data/                       # Inputs, intermediate files, and per-book datasets
+│   ├── raw/<book_id>/          # Original files directly in the book folder; IDs from filenames
+│   ├── processed_text/         # Member 1 text data; existing organization is preserved
+│   ├── image_pipeline/<book_id>/<stele_id>/
+│   │   ├── 01_prepare/        # Native-resolution RGB/JPG, metadata and local comparison
+│   │   ├── 02_ocr/            # Raw OCR, boxes, previews and checkpoints
+│   │   └── 03_filter_sort/    # Local filtering, automatic repairs, reading order and previews
+│   └── dataset/
+│       └── <book_id>/          # One complete dataset per source book
+│           ├── images/        # <stele_id>.<image_index>.jpg, longest edge <= 1024px
+│           ├── patches/       # Future: stele code + box ID, height <= 96px
+│           ├── det_gt.txt     # Detection labels exported by Member 3
+│           ├── rec_gt.txt     # Recognition labels with verified Sino-Nom text
+│           └── results.xlsx   # Per-book output workbook
 │
 ├── src/                        # Core source code
 │   ├── config.py               # Global configurations (Paths, image resize thresholds, etc.)
 │   ├── text_processing.py      # Raw text extraction & cleaning module (Member 1)
-│   ├── image_ocr.py            # Image processing & PaddleOCR pipeline (Member 2)
+│   ├── image_ocr.py            # PDF/JPEG loading and normalization (Member 2)
+│   ├── image_batch.py          # Batch normalization, validation and per-file reports
+│   ├── school_ocr.py           # School API, resumable OCR and box previews (Member 2)
+│   ├── header_ocr.py           # Full-image horizontal pass, header proposals and combined boxes (Member 2)
+│   ├── box_postprocess.py      # Conservative filtering and configurable reading order
+│   ├── box_repair.py           # Local fragment merging and bounded column extension
+│   ├── image_paths.py          # Per-stele stage and handoff paths
+│   ├── page_reference.py       # Supplied page metadata and image-status report (Member 2)
 │   ├── alignment.py            # BertAlign / Levenshtein alignment algorithm (Member 3)
 │   └── utils.py                # Helper functions for I/O operations and formatting
 │
 ├── .gitignore                  # Git ignore rules for large data files
+├── run_image_pipeline.py       # Current Member 2 Run/F5 entry point
 ├── requirements.txt            # Python dependencies
 ├── main.py                     # Entry point executing the full end-to-end pipeline
 └── README.md                   # Project documentation
+
+The assignments currently cover three source books: `di_san_han_nom_huyen_dai_loc`
+(17 stele codes), `van_bia_thoi_tran` (7 texts, 12 faces), and
+`van_khac_han_nom_thang_long_ha_noi`. The supplemental workbook currently displays
+STT 80-123, including 28 image-bearing entries/30 faces; hidden rows are audited
+separately. All three books have dataset
+scaffolding; empty TXT/workbook files are not completed annotations. The one
+existing pilot remains named `bia_20367.001.jpg` inside the Dai Loc book's
+`images/` directory. New names use the stele ID and image index, independently
+of the optional book page.
+Per-book manifests live in `data/image_pipeline/<book_id>/manifest.json`.
+See the Image Pipeline guide for the current layout and updated `--book-id` CLI.
+New runs retain supplied page metadata only; missing pages do not block processing.
+Existing outputs remain unchanged.
+
+Raw inputs use `data/raw/<book_id>/<original_filename>`. The first numeric code
+in each filename identifies its stele; original names and bytes are preserved.
+Unresolved assignments are preserved under `data/raw/<book_id>/_can_doi_chieu/`.
+The local inventory report is `data/image_pipeline/input_inventory/bao_cao_kiem_ke.md`;
+it distinguishes missing references, combined images, and visible/hidden scopes.
 
 ## Coding & Naming Conventions
 
