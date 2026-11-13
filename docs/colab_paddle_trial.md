@@ -7,9 +7,10 @@ bỏ Notes và đưa tọa độ về ảnh gốc. Thứ tự đọc vẫn cần
 
 ## Chạy notebook bằng Run All
 
-Mở [PaddleOCR V6 trên Colab](https://colab.research.google.com/github/DuyLE2408/Epigraphic-OCR-Models/blob/Duong/notebooks/paddle_ocr_v6_colab.ipynb).
-Nếu Colab chưa mở được repository private, tải file `notebooks/paddle_ocr_v6_colab.ipynb`
-từ GitHub hoặc bản local, vào Colab → File → Upload notebook.
+Mở https://colab.research.google.com → **Upload** → chọn file
+`notebooks/paddle_ocr_v6_colab.ipynb` từ máy bạn. Notebook đã chứa phần kết nối
+GitHub; không cần dùng tab GitHub của Colab để tìm/mở repository private.
+Mặc định lấy code từ GitHub và dùng Upload để chọn model/ảnh, tải ZIP kết quả về máy.
 
 1. Chọn Runtime → Change runtime type → T4 GPU.
 2. Với `CODE_SOURCE=GitHub`, thêm Colab Secret `GITHUB_TOKEN` có quyền đọc Contents
@@ -17,8 +18,8 @@ từ GitHub hoặc bản local, vào Colab → File → Upload notebook.
    chưa có Secret. Không ghi token vào code/URL; token không được lưu trong file.
    Nếu token không truy cập được repo đang cộng tác, chọn `ZIP` và dùng gói code
    mới tạo bằng `scripts/build_colab_paddle_bundle.py` (gói cũ trước notebook thiếu file).
-3. `STORAGE_MODE=Drive API`: xác thực Google. Không gọi `drive.mount` đang lỗi.
-   Nếu API cũng lỗi, chọn `Upload`; không cần xóa runtime hay cài lại từ đầu.
+3. Giữ `STORAGE_MODE=Upload` để chạy trước, không cần quyền Google Drive.
+   Khi muốn lưu Drive có thể chọn `Drive API`; notebook không gọi `drive.mount` đang lỗi.
 4. Chọn `RUN_MODE=One`, `IMAGE_NAME=00099.jpg` để thử một ảnh; `All` chạy input
    trong thư mục input đã chọn, lần lượt từng file. Không quét toàn bộ Drive.
 5. Bấm Runtime → Run all. Lần đầu hoàn tất các ô xác thực/chọn file khi được hỏi.

@@ -27,17 +27,21 @@ def notebook():
     Giữ một box cho mỗi vùng Title, bỏ Notes, đưa tọa độ về ảnh gốc. Đây là inference
     bằng model có sẵn, chưa phải train. Chưa sửa box, chốt thứ tự đọc, tạo patches hay dataset.
 
-    **Cách chạy:** Runtime → Change runtime type → **T4 GPU**, chỉnh cấu hình bên dưới,
+    **Mở notebook:** vào https://colab.research.google.com → **Upload** → chọn file
+    `.ipynb` này từ máy bạn. Không cần mở notebook qua tab GitHub của Colab.
+
+    **Cách chạy:** Runtime → Change runtime type → **T4 GPU**, giữ cấu hình mặc định,
     rồi **Runtime → Run all**. Notebook tự gọi hai môi trường; không cần activate thủ công.
-    Lần đầu có thể dừng để hỏi quyền Google/GitHub hoặc chọn file — hoàn tất rồi chờ chạy tiếp.
+    Lần đầu nhập token GitHub trong ô ẩn hoặc chọn file khi được hỏi, rồi chờ chạy tiếp.
 
     Repository private: thêm **Colab Secrets** tên `GITHUB_TOKEN`, bật Notebook access,
     dùng token được phép **đọc Contents của repository này**. Có thể nhập bằng ô ẩn nếu
     chưa có Secret. Không viết token vào code hoặc gửi vào chat. Nếu không dùng token,
     chọn `CODE_SOURCE = "ZIP"` và upload gói code tạo bởi `scripts/build_colab_paddle_bundle.py`.
 
-    `Drive API` dùng xác thực Google và đọc/ghi file qua API, không dùng `drive.mount`
-    đã bị lỗi credential propagation. Nếu xác thực API vẫn lỗi, đổi thành `Upload`.
+    Mặc định `GitHub` lấy code nhánh `Duong`, `Upload` chọn model/ảnh từ máy bạn và
+    tải ZIP kết quả về máy. Không cần kết nối Drive để chạy luồng mặc định.
+    `Drive API` là tùy chọn lưu trữ bổ sung, không dùng `drive.mount` đã bị lỗi.
     Chỉ chọn ảnh/model được phép đưa lên cloud; chế độ riêng tư không thay thế quy định Lab.
     Notebook không chứa hoặc tự tải tài liệu, ảnh bia, model layout hay token từ GitHub.
     ''')
@@ -46,7 +50,7 @@ def notebook():
     from pathlib import Path
 
     CODE_SOURCE = "GitHub" # @param ["GitHub", "ZIP"]
-    STORAGE_MODE = "Drive API" # @param ["Drive API", "Upload"]
+    STORAGE_MODE = "Upload" # @param ["Upload", "Drive API"]
     RUN_MODE = "One" # @param ["One", "All"]
     IMAGE_NAME = "00099.jpg" # @param {type:"string"}
     DRIVE_ROOT_ID = "" # @param {type:"string"}

@@ -31,6 +31,10 @@ class ColabRuntimeTests(unittest.TestCase):
     def test_notebook_is_reproducible_executable_python_and_has_no_saved_outputs(self):
         saved = json.loads((ROOT / "notebooks/paddle_ocr_v6_colab.ipynb").read_text(encoding="utf-8"))
         self.assertEqual(saved, notebook())
+        defaults = {}
+        exec(cell_source(1), defaults)
+        self.assertEqual(defaults["CODE_SOURCE"], "GitHub")
+        self.assertEqual(defaults["STORAGE_MODE"], "Upload")
         identifiers = []
         for cell in saved["cells"]:
             identifiers.append(cell["id"])
