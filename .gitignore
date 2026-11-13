@@ -22,3 +22,5 @@ __pycache__/
 /data/dataset/*/rec_gt.txt
 /data/dataset/*/results.xlsx
 /data/image_pipeline/
+/models/
+/.venv-layout/

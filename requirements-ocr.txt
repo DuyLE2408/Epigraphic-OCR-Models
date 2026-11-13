@@ -1,0 +1,7 @@
+# Separate .venv-ocr only. Versions previously ran successfully on this Windows/Python 3.13 machine.
+# PP-OCRv6 is the MODEL version; paddleocr 3.7.0 is the Python package version.
+setuptools>=75
+paddlepaddle==3.2.0
+paddleocr==3.7.0
+Pillow==13.0.0
+PyMuPDF==1.26.7

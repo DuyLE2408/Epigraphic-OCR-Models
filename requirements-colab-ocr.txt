@@ -1,0 +1,7 @@
+# Install only in /content/venv-ocr, after the official Paddle GPU cu126 wheel.
+setuptools>=75
+paddleocr==3.7.0
+paddlex==3.7.2
+Pillow==13.0.0
+PyMuPDF==1.26.7
+numpy==2.3.5

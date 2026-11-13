@@ -1,0 +1,4 @@
+# Install in Colab's existing PyTorch environment. Do not install Paddle here.
+doclayout-yolo==0.0.4
+ultralytics==8.4.211
+dill==0.4.1
