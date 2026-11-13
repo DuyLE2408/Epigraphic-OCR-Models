@@ -103,11 +103,14 @@ def matches_input_name(path, image_name):
     return Path(path).parts[-len(requested.parts):] == requested.parts
 
 
-def select_inputs(paths, mode, image_name="00099.jpg"):
+def select_inputs(paths, mode, image_name="00099.jpg", *, selected_by_upload=False):
     candidates = sorted(Path(p) for p in paths if Path(p).suffix.lower() in INPUT_SUFFIXES)
     if mode == "One":
-        candidates = [p for p in candidates if matches_input_name(p, image_name)]
+        if not selected_by_upload:
+            candidates = [p for p in candidates if matches_input_name(p, image_name)]
         if len(candidates) != 1:
+            if selected_by_upload:
+                raise ValueError(f"Chế độ One cần chọn đúng một ảnh/PDF; đã chọn {len(candidates)} file hợp lệ.")
             raise ValueError(f"Cần đúng một ảnh tên {image_name}; tìm được {len(candidates)}. Kiểm tra input.")
     elif mode != "All":
         raise ValueError("Chế độ phải là One hoặc All")

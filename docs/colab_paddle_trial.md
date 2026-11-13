@@ -24,6 +24,8 @@ Mặc định lấy code từ GitHub và dùng Upload để chọn model/ảnh, 
    Khi muốn lưu Drive có thể chọn `Drive API`; notebook không gọi `drive.mount` đang lỗi.
 4. Chọn `RUN_MODE=One`, `IMAGE_NAME=00099.jpg` để thử một ảnh; `All` chạy input
    trong thư mục input đã chọn, lần lượt từng file. Không quét toàn bộ Drive.
+   Nếu chọn ảnh bằng hộp Upload thì One dùng đúng file vừa chọn, kể cả tên khác
+   `00099.jpg`; không cần sửa IMAGE_NAME. Tên này chỉ dùng khi tìm ảnh có sẵn.
 5. Bấm Runtime → Run all. Lần đầu hoàn tất các ô xác thực/chọn file khi được hỏi.
    Log cài đặt và OCR hiện trực tiếp; người dùng không phải đổi môi trường.
 

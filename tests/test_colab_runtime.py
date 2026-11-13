@@ -190,6 +190,31 @@ class ColabRuntimeTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             runtime._drive_name("../outside")
 
+    def test_explicit_upload_uses_selected_image_but_directory_lookup_keeps_name_filter(self):
+        chosen = Path("inputs/18827.jpg")
+        self.assertEqual(runtime.select_inputs([chosen], "One", "00099.jpg", selected_by_upload=True), [chosen])
+        with self.assertRaises(ValueError):
+            runtime.select_inputs([chosen], "One", "00099.jpg")
+        with self.assertRaises(ValueError):
+            runtime.select_inputs([chosen, Path("inputs/17512.jpg")], "One", selected_by_upload=True)
+        self.assertEqual(runtime.select_inputs([chosen, Path("inputs/17512.jpg")], "All",
+                                               selected_by_upload=True),
+                         [Path("inputs/17512.jpg"), chosen])
+
+    def test_notebook_accepts_an_uploaded_image_with_a_name_other_than_the_example(self):
+        with TemporaryDirectory() as temp:
+            root = Path(temp)
+            (root / "inputs").mkdir()
+            image = root / "inputs/18827.jpg"
+            image.write_bytes(b"synthetic selection, no model execution")
+            namespace = dict(Path=Path, sources=[], storage=None, LOCAL_INPUT_DIR="",
+                             RUN_MODE="One", IMAGE_NAME="00099.jpg", workspace=root,
+                             runtime=runtime, files=types.SimpleNamespace(upload=lambda **_: {str(image): b""}))
+            with redirect_stdout(StringIO()) as output:
+                exec(cell_source(7), namespace)
+            self.assertEqual(namespace["sources"], [image])
+            self.assertIn("18827.jpg", output.getvalue())
+
     def test_drive_download_cleans_only_its_own_partial_file_and_keeps_existing_file(self):
         module = types.ModuleType("googleapiclient.http")
         class Downloader:

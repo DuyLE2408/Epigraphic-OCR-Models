@@ -200,6 +200,8 @@ def notebook():
     Có thể đặt các thư mục sách bên trong `inputs/`; One tìm đúng một file theo tên
     hoặc đường dẫn tương đối, ví dụ `ten_sach/00099.jpg` để phân biệt tên trùng.
     All chỉ xử lý ảnh JPG/PNG hoặc PDF một trang trong thư mục input này.
+    Khi chọn file bằng hộp Upload, One dùng đúng ảnh vừa chọn; không cần sửa IMAGE_NAME.
+    IMAGE_NAME chỉ dùng để tìm ảnh có sẵn trong Drive hoặc LOCAL_INPUT_DIR.
 
     Nếu Drive chưa có model/ảnh, notebook dùng file đã upload ở `/content` hoặc mở
     hộp chọn file. Với model, chọn **models/layout/best.pt** đang dùng ở local.
@@ -250,6 +252,7 @@ def notebook():
     # @title 6. Chọn một ảnh hoặc All
     sources = []
     from_drive = False
+    selected_by_upload = False
     if storage is not None:
         entries = storage.input_files(drive_inputs)
         if RUN_MODE == "One":
@@ -273,7 +276,8 @@ def notebook():
             uploaded = files.upload(target_dir=str(workspace / "inputs"))
             sources = [Path(p) for p in uploaded]
             del uploaded
-    sources = runtime.select_inputs(sources, RUN_MODE, IMAGE_NAME)
+            selected_by_upload = True
+    sources = runtime.select_inputs(sources, RUN_MODE, IMAGE_NAME, selected_by_upload=selected_by_upload)
     if storage is not None and SAVE_UPLOADED_ASSETS_TO_DRIVE and not from_drive:
         # Preflight all names before uploading, so ambiguous names do not cause partial copies.
         existing_names = {r['name'] for r in storage.children(drive_inputs)}
@@ -284,6 +288,7 @@ def notebook():
             storage.upload(path, drive_inputs)
     print("Số input được chọn:", len(sources))
     print("Chế độ:", RUN_MODE)
+    print("Ảnh đầu tiên:", sources[0].name)
     ''')
     code('''
     # @title 7. Chạy pipeline — tự gọi đúng môi trường, hiện log trực tiếp
