@@ -32,9 +32,10 @@ def notebook():
 
     **Cách chạy:** Runtime → Change runtime type → **T4 GPU**, giữ cấu hình mặc định,
     rồi **Runtime → Run all**. Notebook tự gọi hai môi trường; không cần activate thủ công.
-    Lần đầu nhập token GitHub trong ô ẩn hoặc chọn file khi được hỏi, rồi chờ chạy tiếp.
+    Chọn model/ảnh khi được hỏi rồi chờ chạy tiếp. Repo public không cần token GitHub.
 
-    Repository private: thêm **Colab Secrets** tên `GITHUB_TOKEN`, bật Notebook access,
+    Notebook thử đọc code public trước. Chỉ khi không truy cập được repository/nhánh
+    mới thử xác thực. Với repository private: thêm **Colab Secrets** tên `GITHUB_TOKEN`, bật Notebook access,
     dùng token được phép **đọc Contents của repository này**. Có thể nhập bằng ô ẩn nếu
     chưa có Secret. Không viết token vào code hoặc gửi vào chat. Nếu không dùng token,
     chọn `CODE_SOURCE = "ZIP"` và upload gói code tạo bởi `scripts/build_colab_paddle_bundle.py`.
@@ -83,27 +84,31 @@ def notebook():
 
     def load_github_code():
         import requests
-        from google.colab import userdata
-        try:
-            token = userdata.get("GITHUB_TOKEN")
-        except Exception:
-            token = ""
-        if not token:
-            token = getpass.getpass("GitHub token có quyền đọc repository private (ô ẩn): ")
-        if not token.strip():
-            raise RuntimeError("Chưa có token. Chọn CODE_SOURCE=ZIP nếu không dùng GitHub token.")
         session = requests.Session()
-        session.headers.update({"Authorization": "Bearer " + token.strip(),
-                                "Accept": "application/vnd.github+json"})
-        def request(path, **kwargs):
+        session.headers.update({"Accept": "application/vnd.github+json"})
+        def request(path, *, authenticate_if_needed=False, **kwargs):
             response = session.get("https://api.github.com/repos/" + REPOSITORY + path,
                                    timeout=(15, 90), allow_redirects=False, **kwargs)
+            if authenticate_if_needed and response.status_code in (401, 403, 404):
+                from google.colab import userdata
+                try:
+                    token = userdata.get("GITHUB_TOKEN")
+                except Exception:
+                    token = ""
+                if not token:
+                    print("Chưa đọc được repo/nhánh public (hoặc đã chạm hạn mức GitHub).")
+                    token = getpass.getpass("Token GitHub nếu repo private; bỏ trống để dừng: ")
+                if not token.strip():
+                    raise RuntimeError("Kiểm tra repo/nhánh hoặc chọn CODE_SOURCE=ZIP; chưa có code để chạy.")
+                session.headers.update({"Authorization": "Bearer " + token.strip()})
+                response = session.get("https://api.github.com/repos/" + REPOSITORY + path,
+                                       timeout=(15, 90), allow_redirects=False, **kwargs)
             if response.status_code != 200:
                 raise RuntimeError(f"GitHub HTTP {response.status_code}; kiểm tra quyền đọc repo/nhánh. "
                                    "Có thể chọn CODE_SOURCE=ZIP.")
             return response.json()
         try:
-            sha = request("/git/ref/heads/" + BRANCH)["object"]["sha"]
+            sha = request("/git/ref/heads/" + BRANCH, authenticate_if_needed=True)["object"]["sha"]
             for name in REQUIRED_FILES:
                 value = request("/contents/" + name, params={"ref": sha})
                 if value.get("type") != "file" or value.get("encoding") != "base64":

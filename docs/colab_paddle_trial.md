@@ -13,9 +13,11 @@ GitHub; không cần dùng tab GitHub của Colab để tìm/mở repository pri
 Mặc định lấy code từ GitHub và dùng Upload để chọn model/ảnh, tải ZIP kết quả về máy.
 
 1. Chọn Runtime → Change runtime type → T4 GPU.
-2. Với `CODE_SOURCE=GitHub`, thêm Colab Secret `GITHUB_TOKEN` có quyền đọc Contents
-   repository này và bật Notebook access. Notebook cũng có ô nhập token ẩn nếu
-   chưa có Secret. Không ghi token vào code/URL; token không được lưu trong file.
+2. Với `CODE_SOURCE=GitHub`, repository **public không cần token**. Notebook thử
+   đọc công khai trước; chỉ hỏi xác thực khi không truy cập được repository/nhánh
+   hoặc hết hạn mức request chưa đăng nhập. Nếu repo private, thêm Colab Secret
+   `GITHUB_TOKEN` có quyền đọc Contents repository này và bật Notebook access,
+   hoặc nhập token vào ô ẩn. Không ghi token vào code/URL; token không được lưu trong file.
    Nếu token không truy cập được repo đang cộng tác, chọn `ZIP` và dùng gói code
    mới tạo bằng `scripts/build_colab_paddle_bundle.py` (gói cũ trước notebook thiếu file).
 3. Giữ `STORAGE_MODE=Upload` để chạy trước, không cần quyền Google Drive.

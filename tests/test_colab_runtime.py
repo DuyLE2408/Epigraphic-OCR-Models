@@ -51,15 +51,18 @@ class ColabRuntimeTests(unittest.TestCase):
         headers = {}
         sha = "a" * 40
         class Response:
-            status_code = 200
-            def __init__(self, value):
+            def __init__(self, value, status=200):
                 self.value = value
+                self.status_code = status
             def json(self):
                 return self.value
         def get(url, **kwargs):
-            self.assertEqual(headers["Authorization"], "Bearer " + secret)
             self.assertFalse(kwargs["allow_redirects"])
             calls.append((url, kwargs))
+            if "Authorization" not in headers:
+                self.assertIn("/git/ref/heads/", url)
+                return Response({}, status=404)
+            self.assertEqual(headers["Authorization"], "Bearer " + secret)
             if "/git/ref/heads/" in url:
                 return Response({"object": {"sha": sha}})
             name = url.split("/contents/", 1)[1]
@@ -89,8 +92,40 @@ class ColabRuntimeTests(unittest.TestCase):
             for path in namespace["CODE_ROOT"].rglob("*"):
                 if path.is_file():
                     self.assertNotIn(secret.encode(), path.read_bytes())
-            for _, arguments in calls[1:]:
-                self.assertEqual(arguments["params"], {"ref": sha})
+            for url, arguments in calls:
+                if "/contents/" in url:
+                    self.assertEqual(arguments["params"], {"ref": sha})
+
+    def test_public_github_never_reads_secrets_or_prompts_for_a_token(self):
+        headers = {}
+        sha = "b" * 40
+        def get(url, **kwargs):
+            self.assertNotIn("Authorization", headers)
+            if "/git/ref/heads/" in url:
+                data = {"object": {"sha": sha}}
+            else:
+                content = b"# synthetic source only\n"
+                data = {"type": "file", "encoding": "base64",
+                        "content": base64.b64encode(content).decode(),
+                        "sha": hashlib.sha1(b"blob " + str(len(content)).encode() + b"\0" + content).hexdigest()}
+            return types.SimpleNamespace(status_code=200, json=lambda: data)
+        session = Mock(headers=headers)
+        session.get.side_effect = get
+        requests = types.ModuleType("requests")
+        requests.Session = lambda: session
+        colab = types.ModuleType("google.colab")
+        secret_reader = Mock(side_effect=AssertionError("Public code must not request secrets"))
+        colab.userdata = types.SimpleNamespace(get=secret_reader)
+        with TemporaryDirectory() as temp:
+            namespace = {}
+            exec(cell_source(1), namespace)
+            namespace["WORK_ROOT"] = Path(temp)
+            with patch.dict(sys.modules, {"requests": requests, "google.colab": colab}), \
+                 patch("getpass.getpass", side_effect=AssertionError("Unexpected token prompt")), \
+                 redirect_stdout(StringIO()):
+                exec(cell_source(2), namespace)
+            self.assertEqual(namespace["SOURCE_VERSION"], sha)
+            secret_reader.assert_not_called()
 
     def test_zip_mode_loads_allowlisted_source_and_upload_mode_needs_no_drive_auth(self):
         colab = types.ModuleType("google.colab")
